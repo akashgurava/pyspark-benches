@@ -1,0 +1,16 @@
+{
+    "cSpell.words": [
+        "getorcreate",
+        "pylint",
+        "pyspark"
+    ],
+    "editor.formatOnSave": true,
+    "python.linting.pylintEnabled": true,
+    "python.formatting.provider": "black",
+    "python.analysis.extraPaths": [
+        // pyspark
+        "C:\\Users\\akash\\Documents\\projects\\apps\\spark-2.4\\python",
+        // py4j
+        "C:\\Users\\akash\\Documents\\projects\\apps\\spark-2.4\\python\\lib\\py4j-0.10.7-src.zip'",
+    ]
+}
