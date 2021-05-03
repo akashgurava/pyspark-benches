@@ -5,8 +5,6 @@ Usage:
 Uncomment functions you want to test and run spark-submit <script_name.py>
 
 Inferences:
-LOCAL:
-    Client Mode:
     1. 2 sec overhead coming from spark-submit
     2. spark-submit will not create session in the background. It waits until
         the first getOrCreate call is made.
@@ -18,6 +16,8 @@ LOCAL:
 The overhead comes from spark-submit to get JVM up and running.
 LOCAL:
     Total shell: 2s.
+EMR:
+    Total shell: 2s.
 
 
 2. single getOrCreate call will wait till spark session is acquired.
@@ -25,6 +25,10 @@ LOCAL:
     Total shell: 4s.
     Print:
         First session took: 2.22. From Program Start: 2.22
+EMR:
+    Total shell: 15s.
+    Print:
+        First session took: 12.86. From program start: 12.86
 
 3. spark-submit will not create session in the background. It waits until
 the first getOrCreate call is made
@@ -32,6 +36,10 @@ LOCAL:
     Total shell: 4s.
     Print:
         First session took: 2.22. From Program Start: 2.22
+EMR:
+    Total shell: 18s.
+    Print:
+        Getting session took: 12.66. From program start: 14.66
 
 4. When calling getOrCreate twice, first call will wait till spark session
 completes "Creating". Second will return instantly as it just gets previous
@@ -41,7 +49,11 @@ LOCAL:
     Print:
         First session took: 2.18. From Program Start: 2.18
         Second session took: 0.0. From Program Start: 2.18
-
+EMR:
+    Total shell: 16s.
+    Print:
+        First session took: 13.62. From program start: 13.62
+        Second session took: 0.0. From program start: 13.62
 
 4. When we call getOrCreate after stopping existing. A new session will get
 created.
@@ -52,6 +64,14 @@ LOCAL:
         Stopping session took: 0.31. From Program Start: 2.52
         Second getOrCreate after stop took: 0.19. From Program Start: 2.71
         Create session took: 2.71. From Program Start: 2.71
+EMR:
+    Total shell: 23s
+    Print:
+        Initial getOrCreate took: 12.78. From program start: 12.78
+        Stopping session took: 0.88. From program start: 13.69
+        Second getOrCreate after stop took: 6.9. From program start: 20.59
+        Create session took: 20.59. From program start: 20.59
+
 
 5. When we call getOrCreate after stopping default. A new session will get
 created.
@@ -66,15 +86,27 @@ LOCAL:
         Stopping session took: 0.4. From Program Start: 3.07
         Second getOrCreate after stop took: 0.19. From Program Start: 3.26
         Create second session took: 0.61. From Program Start: 3.26
+LOCAL:
+    Total shell: 30s.
+    Print:
+        Initial getOrCreate took: 11.5. From program start: 11.5
+        Stopping session took: 0.37. From program start: 11.91
+        Second getOrCreate after stop took: 8.02. From program start: 19.93
+        Create first session took: 19.93. From program start: 19.93
+        Initial getOrCreate took: 0.03. From program start: 19.95
+        Stopping session took: 0.37. From program start: 20.36
+        Second getOrCreate after stop took: 7.59. From program start: 27.95
+        Create second session took: 8.02. From program start: 27.95
 
 """
 from time import time, sleep
 
-from findspark import init
-
-init()
 
 from pyspark.sql import SparkSession  # pylint: disable=wrong-import-position
+
+#from findspark import init
+
+# init()
 
 
 P_START = time()
@@ -95,7 +127,8 @@ def print_time_taken(func, name, *args, **kwargs):
     end = time()
     f_time = round(end - start, 2)
     p_time = round(end - P_START, 2)
-    print(f"{name} took: {f_time}. From Program Start: {p_time}")
+    print_stmnt = "{} took: {}. From program start: {}"
+    print(print_stmnt.format(name, f_time, p_time))
     return spark
 
 
@@ -106,7 +139,7 @@ def simple_sleep(wait):
     Args:
         wait (float): wait time in seconds
     """
-    print_time_taken(sleep, f"Sleeping for {wait} sec", wait)
+    print_time_taken(sleep, "Sleeping for {} sec".format(wait), wait)
 
 
 def get_sparksession(app_name=None, conf=None):
@@ -129,7 +162,8 @@ def create_sparksession(app_name=None):
     Returns:
         SparkSession: session created
     """
-    spark = print_time_taken(get_sparksession, "Initial getOrCreate", app_name=app_name)
+    spark = print_time_taken(
+        get_sparksession, "Initial getOrCreate", app_name=app_name)
     conf = spark.sparkContext.getConf()
     print_time_taken(spark.stop, "Stopping session")
     return print_time_taken(

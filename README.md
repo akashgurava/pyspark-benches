@@ -13,14 +13,14 @@ Module to benchmark different scenarios related to get or create PySpark session
 
 ### Inferences
 
-1. `spark-submit` adds overhead
+1. `spark-submit` adds tiny 2s overhead
 2. `spark-submit` will not create session in the background. It waits till first
    `getOrCreate` call is made
 3. Even if ran with `python get_or_create.py` total time equals `spark-submit` + first
     `getOrCreate` call
-4. First call for `getOrCreate` in a `spark-submit` takes time next calls are instant
-5. Stopping session and creating new using `stop` then `getOrCreate` takes a
-   fraction of time to the initial `getOrCreate`
+4. First call for `getOrCreate` in a `spark-submit` takes time, next calls are instant
+5. Stopping session and creating new using `stop` then `getOrCreate` takes approximately
+   80% of time to the initial `getOrCreate`
 
 ### TODO
 
