@@ -25,6 +25,22 @@ LOCAL:
     Total shell: 4s.
     Print:
         First session took: 2.22. From Program Start: 2.22
+LOCAL 1gb:
+    Total shell: 11s.
+    Print:
+        First session took: 5.28. From program start: 5.28
+LOCAL 2gb:
+    Total shell: 11s.
+    Print:
+        First session took: 5.32. From program start: 5.32
+LOCAL 3gb:
+    Total shell: 11s.
+    Print:
+        First session took: 5.44. From program start: 5.44
+LOCAL 4gb:
+    Total shell: 12s.
+    Print:
+        First session took: 6.24. From program start: 6.24
 EMR:
     Total shell: 15s.
     Print:
@@ -49,6 +65,11 @@ LOCAL:
     Print:
         First session took: 2.18. From Program Start: 2.18
         Second session took: 0.0. From Program Start: 2.18
+LOCAL 4gb:
+    Total shell: 14s.
+    Print:
+        First session took: 5.56. From program start: 5.56
+        Second session took: 0.0. From program start: 5.56
 EMR:
     Total shell: 16s.
     Print:
@@ -64,6 +85,13 @@ LOCAL:
         Stopping session took: 0.31. From Program Start: 2.52
         Second getOrCreate after stop took: 0.19. From Program Start: 2.71
         Create session took: 2.71. From Program Start: 2.71
+LOCAL 4gb:
+    Total shell: 12s.
+    Print:
+        Initial getOrCreate took: 5.49. From program start: 5.49
+        Stopping session took: 0.4. From program start: 5.96
+        Second getOrCreate after stop took: 0.46. From program start: 6.43
+        Create session took: 6.43. From program start: 6.43
 EMR:
     Total shell: 23s
     Print:
@@ -86,7 +114,18 @@ LOCAL:
         Stopping session took: 0.4. From Program Start: 3.07
         Second getOrCreate after stop took: 0.19. From Program Start: 3.26
         Create second session took: 0.61. From Program Start: 3.26
-LOCAL:
+LOCAL 4gb:
+    Total shell: 14s.
+    Print:
+        Initial getOrCreate took: 5.46. From program start: 5.46
+        Stopping session took: 0.51. From program start: 6.03
+        Second getOrCreate after stop took: 0.44. From program start: 6.47
+        Create first session took: 6.47. From program start: 6.47
+        Initial getOrCreate took: 0.05. From program start: 6.52
+        Stopping session took: 0.25. From program start: 6.87
+        Second getOrCreate after stop took: 0.46. From program start: 7.33
+        Create second session took: 0.86. From program start: 7.33
+EMR:
     Total shell: 30s.
     Print:
         Initial getOrCreate took: 11.5. From program start: 11.5
@@ -104,7 +143,7 @@ from time import time, sleep
 
 from pyspark.sql import SparkSession  # pylint: disable=wrong-import-position
 
-#from findspark import init
+# from findspark import init
 
 # init()
 
@@ -127,8 +166,8 @@ def print_time_taken(func, name, *args, **kwargs):
     end = time()
     f_time = round(end - start, 2)
     p_time = round(end - P_START, 2)
-    print_stmnt = "{} took: {}. From program start: {}"
-    print(print_stmnt.format(name, f_time, p_time))
+    print_stmt = "{} took: {}. From program start: {}"
+    print(print_stmt.format(name, f_time, p_time))
     return spark
 
 
@@ -162,8 +201,7 @@ def create_sparksession(app_name=None):
     Returns:
         SparkSession: session created
     """
-    spark = print_time_taken(
-        get_sparksession, "Initial getOrCreate", app_name=app_name)
+    spark = print_time_taken(get_sparksession, "Initial getOrCreate", app_name=app_name)
     conf = spark.sparkContext.getConf()
     print_time_taken(spark.stop, "Stopping session")
     return print_time_taken(
@@ -213,7 +251,7 @@ def double_create_sparksession():
 if __name__ == "__main__":
     # single_get_sparksession()
     # single_get_sparksession_after_wait(2)
-    double_get_sparksession()
+    # double_get_sparksession()
     # single_create_sparksession()
-    # double_create_sparksession()
+    double_create_sparksession()
     # pass
